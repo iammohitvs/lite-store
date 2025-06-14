@@ -1,0 +1,23 @@
+#macos system files
+.DS_store
+
+# Debug symbol folders from macOS
+*.dSYM/
+
+# Compiled object and binary files
+*.o
+*.out
+*.exe
+server
+request_handler
+response_handler
+method_handler
+
+# VS Code settings
+.vscode/
+
+# Backup files
+*~
+
+# Flowchart html file used as a guide
+flowchart-to-follow.html
