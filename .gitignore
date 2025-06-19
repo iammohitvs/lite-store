@@ -4,14 +4,20 @@
 # Debug symbol folders from macOS
 *.dSYM/
 
-# Compiled object and binary files
+# Compiled object and
 *.o
 *.out
 *.exe
+
+# Binary files from http-server
 server
 request_handler
 response_handler
 method_handler
+
+# Binary files from in-memory-store
+hash_table
+utils
 
 # VS Code settings
 .vscode/
