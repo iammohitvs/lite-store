@@ -53,9 +53,11 @@ int create_entry(char *name, char* value){
     
     if(prev){
         // add to the end of the linked list
+        new_entry->indexInList = prev->indexInList + 1;
         prev->next = new_entry;
     } else {
-        // add a fully new entry
+        // add a fully new entry to a new row
+        new_entry->indexInList = 0;
         hash_table.hashTableValues[index] = *new_entry;
     }
     
@@ -63,22 +65,55 @@ int create_entry(char *name, char* value){
     return 0;
 }
 
-// testing the create_entry function
+char* read_entry(char *name){
+    if(!name){
+        printf("name not properly received (read entry)");
+        return NULL;
+    }
+
+    int index = get_hash_table_index(name);
+
+    HashTableEntry *entry = &hash_table.hashTableValues[index];
+
+    while(entry && entry->name != NULL){
+        if(strcmp(entry->name, name) == 0){
+            return entry->value;
+        }
+
+        entry = entry->next; 
+    }
+
+    perror("name doesnt exist in the hash table (read entry)");
+    return NULL;
+}
+
+
+// testing the functions
+
 /* int main(int argc, char const *argv[])
 {
     printf("\nINITIALISED HASH TABLE\n:");
     printf("HASH TABLE CAPACITY: %d\n", hash_table.capacity);
 
-    char *name = "Manager";
+    char *name = "stelzner";
+    char *name2 = "steLzner";
     char *value = "Micheal Scott";
+    char *value2 = "Mciheal Scott";
 
     create_entry(name , value);
+    create_entry(name2 , value2);
     int index = get_hash_table_index(name);
+    int index2 = get_hash_table_index(name2);
 
-    printf("CHECKING IN MAIN: \n");
+    printf("CHECKING IN MAIN IF ENTERED: \n");
     printf("TABLE INDEX: %d\n", index);
+    printf("TABLE INDEX FOR 2: %d\n", index2);
     printf("TABLE NAME FOR INDEX: %s\n", hash_table.hashTableValues[index].name);
     printf("TABLE VALUE FOR INDEX: %s\n", hash_table.hashTableValues[index].value);
+
+    printf("CHECKING IN MAIN IF READ: \n");
+    printf("VALUE FOR THE NAME: %s\n", read_entry(name));
+    printf("VALUE FOR THE NAME 2: %s\n", read_entry(name2));
 
     return 0;
 } */
