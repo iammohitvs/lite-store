@@ -11,7 +11,7 @@ typedef struct hash_table_entry{
 } HashTableEntry;
 
 typedef struct {
-    HashTableEntry hashTableValues[MAX_HASH_TABLE_CAPACITY];
+    HashTableEntry* hashTableValues[MAX_HASH_TABLE_CAPACITY];
     int size;
     int capacity;
 } HashTable;
