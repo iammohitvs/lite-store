@@ -9,6 +9,9 @@
 *.out
 *.exe
 
+# Binary files form root
+main
+
 # Binary files from http-server
 server
 request_handler

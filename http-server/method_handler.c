@@ -3,11 +3,42 @@
 #include <stdlib.h>
 
 #include "constants.h"
+#include "../in-memory-store/hash_table.h"
 
 int handle_GET_request(http_request *request){
     /* The normal in-memory-hash logic here to retreive a key value pair */
     printf("\nGET request handled: ");
     printf("%s\n", request->method);
+
+    char* name;
+
+    char* path = strtok(request->path, "?");
+    char* query = strtok(NULL, "?");
+
+    // will extract the first insrance of name from the search query
+    if(query){
+        char* pair = strtok(query, "&");
+
+        while(pair){
+            char* key = strtok(pair, "=");
+            char* val = strtok(NULL, "=");
+
+            if(key && val && (strcmp(key, "name") == 0)){
+                name = val;
+                break;
+            }
+
+            pair = strtok(NULL, "&");
+        }
+    }
+
+    if(name){
+        printf("Extracted the name: %s\n", name);
+        read_entry(name);
+    } else {
+        printf("Unable to extract name\n");
+        /* Send a 400 response */
+    }
 
     return 0;
 }
@@ -16,6 +47,38 @@ int handle_POST_request(http_request *request){
     /* The normal in-memory-hash logic here to create a key value pair */
     printf("\nPOST request handled");
     printf("%s\n", request->method);
+
+    char* name;
+    char* value;
+
+    char* path = strtok(request->path, "?");
+    char* query = strtok(NULL, "?");
+
+    // will extract the first insrance of name and value from the search query
+    if(query){
+        char* pair = strtok(query, "&");
+
+        while(pair){
+            char* key = strtok(pair, "=");
+            char* val = strtok(NULL, "&");
+
+            if(key && val && (strcmp(key, "name") == 0)){
+                name = val;
+            } else if(key && val && (strcmp(key, "value") == 0)){
+                value = val;
+            }
+
+            pair = strtok(NULL, "");
+        }
+    }
+
+    if(name && value){
+        printf("Extracted the name: %s\n", name);
+        printf("Extracted the value: %s\n", value);
+    } else {
+        printf("Unable to extract name\n");
+        /* Send a 400 response */
+    }
 
     return 0;
 }

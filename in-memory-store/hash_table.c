@@ -12,7 +12,7 @@ HashTable hash_table = {
 
 int create_entry(char *name, char* value){
     if(hash_table.size == hash_table.capacity){
-        printf("hash table is full");
+        printf("hash table is full (create entry)\n");
         return -2;
     }
 
@@ -66,8 +66,13 @@ int create_entry(char *name, char* value){
 }
 
 char* read_entry(char *name){
+    if(hash_table.size == 0){
+        printf("hash table is empty (read entry)\n");
+        return NULL;
+    }
+
     if(!name){
-        printf("name not properly received (read entry)");
+        printf("name not properly received (read entry)\n");
         return NULL;
     }
 
@@ -83,13 +88,18 @@ char* read_entry(char *name){
         entry = entry->next; 
     }
 
-    perror("name doesnt exist in the hash table (read entry)");
+    perror("name doesnt exist in the hash table (read entry)\n");
     return NULL;
 }
 
 int delete_entry(char *name){
+    if(hash_table.size == 0){
+        printf("hash table is empty (delete entry)\n");
+        return -2;
+    }
+
     if(!name){
-        printf("name not properly received (delete entry)");
+        printf("name not properly received (delete entry)\n");
         return -1;
     }
 
