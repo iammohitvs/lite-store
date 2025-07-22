@@ -11,7 +11,7 @@ int print_response(char *response){
         return -1;
     }
 
-    printf("\nRESPONSE: %s\n", response);
+    printf("\nRESPONSE: \n%s\n", response);
     return 0;
 }
 
@@ -24,7 +24,7 @@ void get_http_date(char *date, size_t date_size){
 
 int handle_response(char *response, size_t response_size){
     if(!response || !response_size){
-        perror("Invalid response or response size (handle response)");
+        perror("Invalid response or response size or response code (handle response)");
         return -1;
     }
 
@@ -47,7 +47,6 @@ int handle_response(char *response, size_t response_size){
     snprintf(response, response_size, "%s\r\n%s\r\n\r\n%s", status_line, response_headers, response_body);
 
     print_response(response);
-
     return 0;
 }
 
@@ -58,13 +57,14 @@ int return_400_response(char *response, size_t response_size){
     snprintf(response, response_size, "HTTP/1.1 400 Bad Request\r\n"
                         "Date: %s\r\n"
                         "Server: webserver-c\r\n"
-                        "Content-length: 57\r\n"
+                        "Content-length: 64\r\n"
                         "Content-type: text/html\r\n"
                         "Connection: close\r\n\r\n"
                         "<html><body><h1>400 Bad Request</h1>Invalid input.</body></html>",
                         date
                         );
 
+    print_response(response);
     return 0;
 }
 
@@ -75,13 +75,34 @@ int return_500_response(char *response, size_t response_size){
     snprintf(response, response_size, "HTTP/1.1 500 Internal Server Error\r\n"
                         "Date: %s\r\n"
                         "Server: webserver-c\r\n"
-                        "Content-length: 66\r\n"
+                        "Content-length: 81\r\n"
                         "Content-type: text/html\r\n"
                         "Connection: close\r\n\r\n"
                         "<html><body><h1>500 Internal Server Error</h1>Something went wrong.</body></html>",
                         date
                         );
 
+    print_response(response);
+    return 0;
+}
+
+int return_OPTIONS_response(char *response, size_t response_size){
+    char date[128];
+    get_http_date(date, sizeof(date));
+
+    snprintf(response, response_size, "HTTP/1.1 204 No Content\r\n"
+                            "Date: %s\r\n"
+                            "Server: webserver-c\r\n"
+                            "Access-Control-Allow-Origin: *\r\n"
+                            "Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS\r\n"
+                            "Access-Control-Allow-Headers: Content-Type\r\n"
+                            "Allow: GET, POST, DELETE, OPTIONS\r\n"
+                            "Content-Length: 0\r\n"
+                            "Connection: keep-alive\r\n\r\n",
+                            date
+                            );
+
+    print_response(response);
     return 0;
 }
 

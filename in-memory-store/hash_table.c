@@ -98,7 +98,7 @@ char* read_entry(char *name){
 int delete_entry(char *name){
     if(hash_table.size == 0){
         fprintf(stderr, "hash table is empty (delete entry)\n");
-        return -2;
+        return -1;
     }
 
     if(!name){

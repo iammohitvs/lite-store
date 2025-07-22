@@ -78,11 +78,35 @@ int main(int argc, char const *argv[])
         handle_request(buffer, &request);
 
         // Handle the method
-        manage_request(&request);
+        int response_code = manage_request(&request);
 
         // Handle the response
         char response[2048];
-        handle_response(response, sizeof(response));
+
+        switch (response_code)
+        {
+        case 0:
+            if(handle_response(response, sizeof(response)) == -1) {
+                return_500_response(response, sizeof(response));    
+            }
+
+            break;
+        case 204:
+            return_OPTIONS_response(response, sizeof(response));
+            break;
+        case 400:
+            return_400_response(response, sizeof(response));
+            break;
+        case 500:
+            return_500_response(response, sizeof(response));
+            break;
+        default:
+            // something has gone wrong with server code
+            return_500_response(response, sizeof(response));
+            break;
+        }
+
+        printf("response again: %s", response);
 
         int valWrite = write(newSocketFd, response, strlen(response));
         if(valWrite < 1){

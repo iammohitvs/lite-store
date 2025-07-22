@@ -13,12 +13,12 @@ int handle_GET_request(http_request *request){
     char* path_copy = strdup(request->path);
 
     const char* query = strchr(path_copy, '?');
-    if (!query) return -1;
+    if (!query) return 400;
 
     query++;
 
     const char* name_param = strstr(query, "name=");
-    if(!name_param) return -1;
+    if(!name_param) return 400;
     name_param += 5;
 
     const char* end = strchr(path_copy, '&');
@@ -50,14 +50,14 @@ int handle_POST_request(http_request *request){
     char* path_copy = strdup(request->path);
 
     const char* query = strchr(path_copy, '?');
-    if (!query) return -1;
+    if (!query) return 400;
 
     query++;
 
     const char* name_param = strstr(query, "name=");
     if(!name_param){
         printf("Unable to extract name\n");
-        return -1;
+        return 400;
     }
     name_param += 5;
 
@@ -66,8 +66,8 @@ int handle_POST_request(http_request *request){
     if(end_name){
         len_name = end_name - name_param;
     } else {
-        printf("Unable to extract value\n");
-        return -1;
+        printf("Unable to extract name\n");
+        return 400;
     }
 
     char* name = (char *)malloc(len_name + 1);
@@ -84,7 +84,7 @@ int handle_POST_request(http_request *request){
     const char* value_param = strstr(query, "value=");
     if(!value_param){
         printf("Unable to extract value\n");
-        return -1;
+        return 500;
     }
     value_param += 6;
 
@@ -112,6 +112,36 @@ int handle_DELETE_request(http_request *request){
     printf("\nDELETE request handled: ");
     printf("%s\n", request->method);
 
+    char* path_copy = strdup(request->path);
+
+    const char* query = strchr(path_copy, '?');
+    if (!query) return 400;
+
+    query++;
+
+    const char* name_param = strstr(query, "name=");
+    if(!name_param) return 400;
+    name_param += 5;
+
+    const char* end = strchr(path_copy, '&');
+    size_t len = end ? (end - name_param) : strlen(name_param);
+
+    char* name = (char *)malloc(len + 1);
+    if(name){
+        strncpy(name, name_param, len);
+        name[len] = '\0';
+
+        printf("Extracted the name: %s\n", name);
+        int is_entry_deleted = delete_entry(name);
+
+        if(is_entry_deleted == -1) return 500;
+    } else {
+        printf("Unable to extract name\n");
+        return 500;
+    }
+
+    free(path_copy);
+    free(name);
     return 0;
 }
 
@@ -128,9 +158,7 @@ int handle_PATCH_request(){
 }
 
 int handle_OPTIONS_request(){
-    /* TODO */
-    
-    return 0;
+    return 204;
 }
 
 int manage_request(http_request *request){
@@ -138,7 +166,7 @@ int manage_request(http_request *request){
     {
     case 'G':
         /* GET */
-        handle_GET_request(request);
+        return handle_GET_request(request);
         break;
     case 'P':
         /* POST, PUT, PATCH */
@@ -146,7 +174,7 @@ int manage_request(http_request *request){
         {
         case 'O':
             /* POST */
-            handle_POST_request(request);
+            return handle_POST_request(request);
             break;
         case 'U':
             /* PUT */
@@ -161,7 +189,11 @@ int manage_request(http_request *request){
         break;
     case 'D':
         /* DELETE */
-        handle_DELETE_request(request);
+        return handle_DELETE_request(request);
+        break;
+    case 'O':
+        /* DELETE */
+        return handle_OPTIONS_request();
         break;
     default:
         printf("Manage request (cannot identify method) - outer switch");
