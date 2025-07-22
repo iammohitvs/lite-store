@@ -50,7 +50,7 @@ int main(int argc, char const *argv[])
         perror("Webserver (listen)");
         return 1;
     }
-    printf("Socket listening for connections on port: %d\n", PORT);
+    printf("Socket listening for connections on port: %d\n\n", PORT);
 
     for(;;){
         int newSocketFd = accept(socketFileDescriptor, (struct sockaddr *)&host_addr, (socklen_t *)&addr_len);

@@ -12,12 +12,12 @@ HashTable hash_table = {
 
 int create_entry(char *name, char* value){
     if(hash_table.size == hash_table.capacity){
-        printf("hash table is full (create entry)\n");
+        fprintf(stderr, "hash table is full (create entry)\n");
         return -2;
     }
 
     if(!name || !value){
-        perror("name or value not found (create entry)");
+        fprintf(stderr, "name or value not found (create entry)\n");
         return -1;
     }
 
@@ -25,8 +25,8 @@ int create_entry(char *name, char* value){
     int index = get_hash_table_index(name);
     printf("INDEX FOR THE NAME: %d\n", index);
 
-    HashTableEntry *entry = hash_table.hashTableValues[index];
-    HashTableEntry *prev = NULL;
+    HashTableEntry* entry = hash_table.hashTableValues[index];
+    HashTableEntry* prev = NULL;
 
     // update the value if a name exists already
     while (entry && entry->name != NULL)
@@ -43,7 +43,7 @@ int create_entry(char *name, char* value){
 
     HashTableEntry *new_entry = malloc(sizeof(HashTableEntry));;
     if (!new_entry){
-        perror("Failed to malloc for new entry (create entry)");
+        fprintf(stderr, "Failed to malloc for new entry (create entry)");
         return -1;
     }
 
@@ -62,22 +62,25 @@ int create_entry(char *name, char* value){
     }
     
     hash_table.size += 1;
+
+    printf("Entered the name and the value into the hash table!\n");
     return 0;
 }
 
 char* read_entry(char *name){
+    printf("Hash table size when trying to read: %d\n", hash_table.size);
+
     if(hash_table.size == 0){
-        printf("hash table is empty (read entry)\n");
+        fprintf(stderr, "hash table is empty (read entry)\n");
         return NULL;
     }
 
     if(!name){
-        printf("name not properly received (read entry)\n");
+        fprintf(stderr, "name not properly received (read entry)\n");
         return NULL;
     }
 
     int index = get_hash_table_index(name);
-
     HashTableEntry *entry = hash_table.hashTableValues[index];
 
     while(entry && entry->name != NULL){
@@ -88,18 +91,18 @@ char* read_entry(char *name){
         entry = entry->next; 
     }
 
-    perror("name doesnt exist in the hash table (read entry)\n");
+    fprintf(stderr, "name doesnt exist in the hash table (read entry)\n");
     return NULL;
 }
 
 int delete_entry(char *name){
     if(hash_table.size == 0){
-        printf("hash table is empty (delete entry)\n");
+        fprintf(stderr, "hash table is empty (delete entry)\n");
         return -2;
     }
 
     if(!name){
-        printf("name not properly received (delete entry)\n");
+        fprintf(stderr, "name not properly received (delete entry)\n");
         return -1;
     }
 
@@ -126,7 +129,7 @@ int delete_entry(char *name){
         entry = entry->next;
     }
 
-    printf("Entry doesn't exist in the table for name: %s\n", name);
+    fprintf(stderr, "Entry doesn't exist in the table for name: %s\n", name);
     return -1;
 }
 

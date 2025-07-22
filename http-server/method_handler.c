@@ -10,82 +10,106 @@ int handle_GET_request(http_request *request){
     printf("\nGET request handled: ");
     printf("%s\n", request->method);
 
-    char* name;
+    char* path_copy = strdup(request->path);
 
-    char* path = strtok(request->path, "?");
-    char* query = strtok(NULL, "?");
+    const char* query = strchr(path_copy, '?');
+    if (!query) return -1;
 
-    // will extract the first insrance of name from the search query
-    if(query){
-        char* pair = strtok(query, "&");
+    query++;
 
-        while(pair){
-            char* key = strtok(pair, "=");
-            char* val = strtok(NULL, "=");
+    const char* name_param = strstr(query, "name=");
+    if(!name_param) return -1;
+    name_param += 5;
 
-            if(key && val && (strcmp(key, "name") == 0)){
-                name = val;
-                break;
-            }
+    const char* end = strchr(path_copy, '&');
+    size_t len = end ? (end - name_param) : strlen(name_param);
 
-            pair = strtok(NULL, "&");
-        }
-    }
-
+    char* name = (char *)malloc(len + 1);
     if(name){
+        strncpy(name, name_param, len);
+        name[len] = '\0';
+
         printf("Extracted the name: %s\n", name);
-        read_entry(name);
+        char* read_entry_value = read_entry(name);
+        printf("Read entry value: %s\n", read_entry_value);
     } else {
         printf("Unable to extract name\n");
-        /* Send a 400 response */
+        return 500;
     }
 
+    free(path_copy);
+    free(name);
     return 0;
 }
 
 int handle_POST_request(http_request *request){
     /* The normal in-memory-hash logic here to create a key value pair */
-    printf("\nPOST request handled");
+    printf("\nPOST request handled: ");
     printf("%s\n", request->method);
 
-    char* name;
-    char* value;
+    char* path_copy = strdup(request->path);
 
-    char* path = strtok(request->path, "?");
-    char* query = strtok(NULL, "?");
+    const char* query = strchr(path_copy, '?');
+    if (!query) return -1;
 
-    // will extract the first insrance of name and value from the search query
-    if(query){
-        char* pair = strtok(query, "&");
+    query++;
 
-        while(pair){
-            char* key = strtok(pair, "=");
-            char* val = strtok(NULL, "&");
+    const char* name_param = strstr(query, "name=");
+    if(!name_param){
+        printf("Unable to extract name\n");
+        return -1;
+    }
+    name_param += 5;
 
-            if(key && val && (strcmp(key, "name") == 0)){
-                name = val;
-            } else if(key && val && (strcmp(key, "value") == 0)){
-                value = val;
-            }
-
-            pair = strtok(NULL, "");
-        }
+    char* end_name = strchr(path_copy, '&');
+    size_t len_name;
+    if(end_name){
+        len_name = end_name - name_param;
+    } else {
+        printf("Unable to extract value\n");
+        return -1;
     }
 
-    if(name && value){
+    char* name = (char *)malloc(len_name + 1);
+    if(name){
+        strncpy(name, name_param, len_name);
+        name[len_name] = '\0';
+
         printf("Extracted the name: %s\n", name);
-        printf("Extracted the value: %s\n", value);
     } else {
         printf("Unable to extract name\n");
-        /* Send a 400 response */
+        return 500;
     }
 
+    const char* value_param = strstr(query, "value=");
+    if(!value_param){
+        printf("Unable to extract value\n");
+        return -1;
+    }
+    value_param += 6;
+
+    char* end_value = strchr(value_param, '&');
+    size_t len_value = end_value ? (end_value - value_param) : strlen(value_param);
+    char* value = (char *)malloc(len_value + 1);
+    if(value){
+        strncpy(value, value_param, len_value);
+        value[len_value] = '\0';
+
+        printf("Extracted the value: %s\n", value);
+    } else {
+        printf("Unable to extract value\n");
+        return 500;
+    }
+
+    create_entry(name, value);
+
+    free(path_copy);
     return 0;
 }
 
 int handle_DELETE_request(http_request *request){
     /* The normal in-memory-hash logic here to remove a key value pair */
-    printf("\nDELETE request handled");
+    printf("\nDELETE request handled: ");
     printf("%s\n", request->method);
 
     return 0;

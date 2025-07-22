@@ -10,7 +10,6 @@ int print_request(http_request *request){
     }
 
     printf("\nREQUEST:\n");
-    printf("Success!\n");
     printf("Method: %s\n", request->method);
     printf("Path: %s\n", request->path);
     printf("Version: %s\n", request->version);
