@@ -5,20 +5,22 @@
 #include "constants.h"
 #include "../in-memory-store/hash_table.h"
 
-int handle_GET_request(http_request *request){
+char *handle_GET_request(http_request *request){
     /* The normal in-memory-hash logic here to retreive a key value pair */
     printf("\nGET request handled: ");
     printf("%s\n", request->method);
 
     char* path_copy = strdup(request->path);
+    char *error_return_400 = "400";
+    char *error_return_500 = "500";
 
     const char* query = strchr(path_copy, '?');
-    if (!query) return 400;
+    if (!query) return error_return_400;
 
     query++;
 
     const char* name_param = strstr(query, "name=");
-    if(!name_param) return 400;
+    if(!name_param) return error_return_400;
     name_param += 5;
 
     const char* end = strchr(path_copy, '&');
@@ -31,10 +33,17 @@ int handle_GET_request(http_request *request){
 
         printf("Extracted the name: %s\n", name);
         char* read_entry_value = read_entry(name);
-        printf("Read entry value: %s\n", read_entry_value);
+
+        if(!read_entry_value){
+            printf("name doesnt exist in the hash table (read entry)\n");
+            return error_return_400;
+        } else {
+            printf("Read entry value: %s\n", read_entry_value);
+            return read_entry_value;
+        }
     } else {
         printf("Unable to extract name\n");
-        return 500;
+        return error_return_500;
     }
 
     free(path_copy);
@@ -42,22 +51,25 @@ int handle_GET_request(http_request *request){
     return 0;
 }
 
-int handle_POST_request(http_request *request){
+char* handle_POST_request(http_request *request){
     /* The normal in-memory-hash logic here to create a key value pair */
     printf("\nPOST request handled: ");
     printf("%s\n", request->method);
 
+    char *error_return_400 = "400";
+    char *error_return_500 = "500";
+
     char* path_copy = strdup(request->path);
 
     const char* query = strchr(path_copy, '?');
-    if (!query) return 400;
+    if (!query) return error_return_400;
 
     query++;
 
     const char* name_param = strstr(query, "name=");
     if(!name_param){
         printf("Unable to extract name\n");
-        return 400;
+        return error_return_400;
     }
     name_param += 5;
 
@@ -67,7 +79,7 @@ int handle_POST_request(http_request *request){
         len_name = end_name - name_param;
     } else {
         printf("Unable to extract name\n");
-        return 400;
+        return error_return_400;
     }
 
     char* name = (char *)malloc(len_name + 1);
@@ -78,13 +90,13 @@ int handle_POST_request(http_request *request){
         printf("Extracted the name: %s\n", name);
     } else {
         printf("Unable to extract name\n");
-        return 500;
+        return error_return_500;
     }
 
     const char* value_param = strstr(query, "value=");
     if(!value_param){
         printf("Unable to extract value\n");
-        return 500;
+        return error_return_500;
     }
     value_param += 6;
 
@@ -98,29 +110,33 @@ int handle_POST_request(http_request *request){
         printf("Extracted the value: %s\n", value);
     } else {
         printf("Unable to extract value\n");
-        return 500;
+        return error_return_500;
     }
 
-    create_entry(name, value);
+    char* return_name = create_entry(name, value);
 
     free(path_copy);
-    return 0;
+    return return_name;
 }
 
-int handle_DELETE_request(http_request *request){
+char* handle_DELETE_request(http_request *request){
     /* The normal in-memory-hash logic here to remove a key value pair */
     printf("\nDELETE request handled: ");
     printf("%s\n", request->method);
 
+    char *error_return_400 = "400";
+    char *error_return_500 = "500";
+    char *empty = "empty";
+
     char* path_copy = strdup(request->path);
 
     const char* query = strchr(path_copy, '?');
-    if (!query) return 400;
+    if (!query) return error_return_400;
 
     query++;
 
     const char* name_param = strstr(query, "name=");
-    if(!name_param) return 400;
+    if(!name_param) return error_return_400;
     name_param += 5;
 
     const char* end = strchr(path_copy, '&');
@@ -132,17 +148,17 @@ int handle_DELETE_request(http_request *request){
         name[len] = '\0';
 
         printf("Extracted the name: %s\n", name);
-        int is_entry_deleted = delete_entry(name);
+        char* entry_deleted_value = delete_entry(name);
 
-        if(is_entry_deleted == -1) return 500;
+        return entry_deleted_value;
     } else {
         printf("Unable to extract name\n");
-        return 500;
+
+        return error_return_500;
     }
 
     free(path_copy);
     free(name);
-    return 0;
 }
 
 int handle_PUT_request(){
@@ -157,11 +173,15 @@ int handle_PATCH_request(){
     return 0;
 }
 
-int handle_OPTIONS_request(){
-    return 204;
+char* handle_OPTIONS_request(){
+    char *return_204 = "204";
+    return return_204;
 }
 
-int manage_request(http_request *request){
+char* manage_request(http_request *request){
+    char *error_return_400 = "400";
+    char *error_return_500 = "500";
+
     switch (request->method[0])
     {
     case 'G':
@@ -184,7 +204,7 @@ int manage_request(http_request *request){
             break;
         default:
             printf("Manage request (cannot identify method) - inner switch");
-            return -1;
+            return error_return_400;
         }
         break;
     case 'D':
@@ -197,7 +217,7 @@ int manage_request(http_request *request){
         break;
     default:
         printf("Manage request (cannot identify method) - outer switch");
-        return -1;
+        return error_return_400;
     }
 
     return 0;

@@ -22,7 +22,7 @@ void get_http_date(char *date, size_t date_size){
     strftime(date, date_size, "%a, %d %b %Y %H:%M:%S GMT", gmt); // formatting the time to required standards
 }
 
-int handle_response(char *response, size_t response_size){
+int handle_response(char *response, size_t response_size, char *response_content){
     if(!response || !response_size){
         perror("Invalid response or response size or response code (handle response)");
         return -1;
@@ -30,9 +30,15 @@ int handle_response(char *response, size_t response_size){
 
     char status_line[] = "HTTP/1.1 200 OK";
     char response_headers[256];
-    char response_body[] = "<html>"
-                            "<body><h1>Successful response!</h1></body>"
-                            "</html>";
+    char response_body[1024];
+    
+    snprintf(response_body, 
+            sizeof(response_body),
+            "<html>"
+                "<body><h1>%s</h1></body>"
+            "</html>",
+            response_content
+            );
 
     char date[128];
     get_http_date(date, sizeof(date));

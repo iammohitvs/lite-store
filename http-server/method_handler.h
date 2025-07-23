@@ -3,6 +3,6 @@
 
 #include "constants.h"
 
-int manage_request(http_request *request);
+char* manage_request(http_request *request);
 
 #endif

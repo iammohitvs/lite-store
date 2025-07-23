@@ -10,15 +10,18 @@ HashTable hash_table = {
     .capacity = MAX_HASH_TABLE_CAPACITY
 };
 
-int create_entry(char *name, char* value){
+char* create_entry(char *name, char* value){
+    char *error_return_400 = "400";
+    char *full = "full";
+
     if(hash_table.size == hash_table.capacity){
         fprintf(stderr, "hash table is full (create entry)\n");
-        return -2;
+        return full;
     }
 
     if(!name || !value){
         fprintf(stderr, "name or value not found (create entry)\n");
-        return -1;
+        return error_return_400;
     }
 
     // get the index
@@ -33,7 +36,7 @@ int create_entry(char *name, char* value){
     {
         if(strcmp(entry->name, name) == 0){
             entry->value = value;
-            return 0;
+            return name;
         }
 
         prev = entry;
@@ -44,7 +47,7 @@ int create_entry(char *name, char* value){
     HashTableEntry *new_entry = malloc(sizeof(HashTableEntry));;
     if (!new_entry){
         fprintf(stderr, "Failed to malloc for new entry (create entry)");
-        return -1;
+        return error_return_400;
     }
 
     new_entry->name = name;
@@ -64,7 +67,7 @@ int create_entry(char *name, char* value){
     hash_table.size += 1;
 
     printf("Entered the name and the value into the hash table!\n");
-    return 0;
+    return name;
 }
 
 char* read_entry(char *name){
@@ -95,15 +98,18 @@ char* read_entry(char *name){
     return NULL;
 }
 
-int delete_entry(char *name){
+char* delete_entry(char *name){
+    char *error_return_400 = "400";
+    char *empty = "empty";
+
     if(hash_table.size == 0){
         fprintf(stderr, "hash table is empty (delete entry)\n");
-        return -1;
+        return empty;
     }
 
     if(!name){
         fprintf(stderr, "name not properly received (delete entry)\n");
-        return -1;
+        return error_return_400;
     }
 
     int index = get_hash_table_index(name);
@@ -123,14 +129,14 @@ int delete_entry(char *name){
             hash_table.size -= 1;
 
             printf("Entry found and deleted\n");
-            return 0;
+            return name;
         }
 
         entry = entry->next;
     }
 
     fprintf(stderr, "Entry doesn't exist in the table for name: %s\n", name);
-    return -1;
+    return error_return_400;
 }
 
 

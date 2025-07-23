@@ -78,35 +78,34 @@ int main(int argc, char const *argv[])
         handle_request(buffer, &request);
 
         // Handle the method
-        int response_code = manage_request(&request);
+        char* response_value = manage_request(&request);
 
         // Handle the response
         char response[2048];
+        char response_content[1024];
 
-        switch (response_code)
-        {
-        case 0:
-            if(handle_response(response, sizeof(response)) == -1) {
+        if(strcmp(response_value, "empty") == 0){
+            snprintf(response_content, sizeof(response_content), "hash table is empty!");
+            if(handle_response(response, sizeof(response), response_content) == -1) {
                 return_500_response(response, sizeof(response));    
             }
-
-            break;
-        case 204:
+        } else if(strcmp(response_value, "full") == 0){
+            snprintf(response_content, sizeof(response_content), "hash table is full!");
+            if(handle_response(response, sizeof(response), response_content) == -1) {
+                return_500_response(response, sizeof(response));    
+            }
+        } else if(strcmp(response_value, "204") == 0){
             return_OPTIONS_response(response, sizeof(response));
-            break;
-        case 400:
+        } else if(strcmp(response_value, "400") == 0){
             return_400_response(response, sizeof(response));
-            break;
-        case 500:
+        } else if(strcmp(response_value, "500") == 0){
             return_500_response(response, sizeof(response));
-            break;
-        default:
-            // something has gone wrong with server code
-            return_500_response(response, sizeof(response));
-            break;
+        } else {
+            snprintf(response_content, sizeof(response_content), "query executed successfully: %s!", response_value);
+            if(handle_response(response, sizeof(response), response_content) == -1) {
+                return_500_response(response, sizeof(response));
+            }
         }
-
-        printf("response again: %s", response);
 
         int valWrite = write(newSocketFd, response, strlen(response));
         if(valWrite < 1){

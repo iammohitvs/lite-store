@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-int handle_response(char *response, size_t response_size);
+int handle_response(char *response, size_t response_size, char *response_content);
 
 int return_400_response(char *response, size_t response_size);
 
