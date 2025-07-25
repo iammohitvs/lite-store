@@ -22,6 +22,9 @@ method_handler
 hash_table
 utils
 
+# Data file to maintain persistence
+data.csv
+
 # VS Code settings
 .vscode/
 

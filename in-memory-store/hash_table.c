@@ -19,7 +19,7 @@ char* create_entry(char *name, char* value){
     char *error_return_400 = "400";
     char *full = "full";
 
-    if(hash_table.size == hash_table.capacity){
+    if(hash_table.size == hash_table.capacity - 1){
         fprintf(stderr, "hash table is full (create entry)\n");
         return full;
     }
@@ -33,7 +33,7 @@ char* create_entry(char *name, char* value){
 
     // get the index
     int index = get_hash_table_index(name);
-    printf("INDEX FOR THE NAME: %d\n", index);
+    printf("Index for the name %s and value %s is %d\n", name, value, index);
 
     HashTableEntry* entry = hash_table.hashTableValues[index];
     HashTableEntry* prev = NULL;
@@ -42,7 +42,15 @@ char* create_entry(char *name, char* value){
     while (entry && entry->name != NULL)
     {
         if(strcmp(entry->name, name) == 0){
-            entry->value = value;
+            free(entry->value);
+            entry->value = strdup(value);
+            if (!entry->value) {
+                fprintf(stderr, "Could not allocate memory for the updated value (create entry)");
+                free(entry->value);
+                pthread_mutex_unlock(&write_mutex);
+                return error_return_400;
+            }
+
             pthread_mutex_unlock(&write_mutex);
             return name;
         }
@@ -59,9 +67,17 @@ char* create_entry(char *name, char* value){
         return error_return_400;
     }
 
-    new_entry->name = name;
-    new_entry->value = value;
+    new_entry->name = strdup(name);
+    new_entry->value = strdup(value);
     new_entry->next = NULL;
+    if (!new_entry->name || !new_entry->value) {
+        fprintf(stderr, "Could not allocate memory for the new name and value (create entry)");
+        free(new_entry->name);
+        free(new_entry->value);
+        free(new_entry);
+        pthread_mutex_unlock(&write_mutex);
+        return error_return_400;
+    }
     
     if(prev){
         // add to the end of the linked list
@@ -81,8 +97,6 @@ char* create_entry(char *name, char* value){
 }
 
 char* read_entry(char *name){
-    printf("Hash table size when trying to read: %d\n", hash_table.size);
-
     if(hash_table.size == 0){
         fprintf(stderr, "hash table is empty (read entry)\n");
         return NULL;
@@ -171,6 +185,48 @@ char* delete_entry(char *name){
     return error_return_400;
 }
 
+void save_data_to_disk(const char *filename){
+    FILE *file = fopen(filename, "w");
+    if(file == NULL){
+        perror("could not open file to save data (save to disk)\n");
+        return;
+    }
+
+    printf("Saving hash_table data to disk...\n");
+    for(int i = 0; i < hash_table.capacity; i++){
+        HashTableEntry *entry = hash_table.hashTableValues[i];
+        while (entry != NULL){
+            fprintf(file, "%s,%s\n", entry->name, entry->value);
+            entry = entry->next;
+        }
+    }
+
+    fclose(file);
+    printf("Data saved to disk successfully!\n");
+}
+
+void load_data_from_disk(const char *filename){
+    FILE *file = fopen(filename, "r");
+    if(file == NULL){
+        printf("Could not open file to read data, starting as a fresh db (read from disk)\n\n");
+        return;
+    }
+
+    char line[4096];
+    while(fgets(line, sizeof(line), file)){
+        line[strcspn(line, "\n")] =  0; // this removes the trailing wnewline character
+
+        char *name = strtok(line, ",");
+        char *value = strtok(NULL, ",");
+
+        if(name && value){
+            create_entry(name, value);
+        }
+    }
+
+    fclose(file);
+    printf("\nData loaded from disk onto memory store\n\n");
+}
 
 // testing the functions
 

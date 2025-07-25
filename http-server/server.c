@@ -5,11 +5,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "constants.h"
 #include "request_handler.h"
 #include "method_handler.h"
 #include "response_handler.h"
+#include "../in-memory-store/hash_table.h"
 
 #define PORT 8080
 #define BUFFER_SIZE 2048
@@ -24,7 +26,10 @@ pthread_t request_threads[THREAD_ARRAY_SIZE];
 int request_threads_counter[THREAD_ARRAY_SIZE] = { 0 };
 pthread_mutex_t counter_mutex;
 
+char *filename = "data.csv";
+
 void *request_routine(void *newSocketFd);
+void handle_server_shutdown(int signal);
 
 int main(int argc, char const *argv[])
 {
@@ -65,7 +70,14 @@ int main(int argc, char const *argv[])
     }
     printf("Socket listening for connections on port: %d\n\n", PORT);
 
+    // handle the signal for Ctrl+C server shutdown
+    signal(SIGINT, handle_server_shutdown);
+
+    // load data from disk onto the hash table
+    load_data_from_disk(filename);
+
     for(;;){
+        // for each new connection, create a new thread to process that request and continue hearing for more requests
         int newSocketFd = accept(socketFileDescriptor, (struct sockaddr *)&host_addr, (socklen_t *)&addr_len);
         if(newSocketFd < 0){
             perror("Webserver (accept)");
@@ -124,8 +136,6 @@ int main(int argc, char const *argv[])
 }
 
 void *request_routine(void *thread_args){
-    sleep(10);
-    
     thread_args_t *args = (thread_args_t *)thread_args;
 
     int newSocketFd = args->socket_fd;
@@ -170,7 +180,7 @@ void *request_routine(void *thread_args){
     } else if(strcmp(response_value, "500") == 0){
         return_500_response(response, sizeof(response));
     } else {
-        snprintf(response_content, sizeof(response_content), "query executed successfully: %s!", response_value);
+        snprintf(response_content, sizeof(response_content), "query executed successfully: %s", response_value);
         if(handle_response(response, sizeof(response), response_content) == -1) {
             return_500_response(response, sizeof(response));
         }
@@ -191,4 +201,10 @@ void *request_routine(void *thread_args){
     pthread_mutex_unlock(&counter_mutex);
 
     return NULL;
+}
+
+void handle_server_shutdown(int signal){
+    printf("\nCaught signal for server shutdown. Persisting data to disk\n");
+    save_data_to_disk(filename);
+    exit(0);
 }
