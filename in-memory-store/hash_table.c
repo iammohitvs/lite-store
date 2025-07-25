@@ -1,8 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "utils.h"
+
+pthread_mutex_t write_mutex;
+pthread_mutex_t read_count_mutex;
+int readers_count = 0;
 
 HashTable hash_table = {
     .hashTableValues = { NULL },
@@ -24,6 +29,8 @@ char* create_entry(char *name, char* value){
         return error_return_400;
     }
 
+    pthread_mutex_lock(&write_mutex);
+
     // get the index
     int index = get_hash_table_index(name);
     printf("INDEX FOR THE NAME: %d\n", index);
@@ -36,6 +43,7 @@ char* create_entry(char *name, char* value){
     {
         if(strcmp(entry->name, name) == 0){
             entry->value = value;
+            pthread_mutex_unlock(&write_mutex);
             return name;
         }
 
@@ -47,6 +55,7 @@ char* create_entry(char *name, char* value){
     HashTableEntry *new_entry = malloc(sizeof(HashTableEntry));;
     if (!new_entry){
         fprintf(stderr, "Failed to malloc for new entry (create entry)");
+        pthread_mutex_unlock(&write_mutex);
         return error_return_400;
     }
 
@@ -65,6 +74,7 @@ char* create_entry(char *name, char* value){
     }
     
     hash_table.size += 1;
+    pthread_mutex_unlock(&write_mutex);
 
     printf("Entered the name and the value into the hash table!\n");
     return name;
@@ -83,11 +93,21 @@ char* read_entry(char *name){
         return NULL;
     }
 
+    pthread_mutex_lock(&read_count_mutex);
+    readers_count++;
+    if(readers_count == 1) pthread_mutex_lock(&write_mutex);
+    pthread_mutex_unlock(&read_count_mutex);
+
     int index = get_hash_table_index(name);
     HashTableEntry *entry = hash_table.hashTableValues[index];
 
     while(entry && entry->name != NULL){
         if(strcmp(entry->name, name) == 0){
+            pthread_mutex_lock(&read_count_mutex);
+            readers_count--;
+            if(readers_count == 0) pthread_mutex_unlock(&write_mutex);
+            pthread_mutex_unlock(&read_count_mutex);
+
             return entry->value;
         }
 
@@ -95,6 +115,12 @@ char* read_entry(char *name){
     }
 
     fprintf(stderr, "name doesnt exist in the hash table (read entry)\n");
+
+    pthread_mutex_lock(&read_count_mutex);
+    readers_count--;
+    if(readers_count == 0) pthread_mutex_unlock(&write_mutex);
+    pthread_mutex_unlock(&read_count_mutex);
+
     return NULL;
 }
 
@@ -112,6 +138,8 @@ char* delete_entry(char *name){
         return error_return_400;
     }
 
+    pthread_mutex_lock(&write_mutex);
+
     int index = get_hash_table_index(name);
 
     HashTableEntry *entry = hash_table.hashTableValues[index];
@@ -128,12 +156,16 @@ char* delete_entry(char *name){
             free(entry);
             hash_table.size -= 1;
 
+            pthread_mutex_unlock(&write_mutex);
+            
             printf("Entry found and deleted\n");
             return name;
         }
 
         entry = entry->next;
     }
+
+    pthread_mutex_unlock(&write_mutex);
 
     fprintf(stderr, "Entry doesn't exist in the table for name: %s\n", name);
     return error_return_400;
