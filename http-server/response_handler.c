@@ -34,9 +34,9 @@ int handle_response(char *response, size_t response_size, char *response_content
     
     snprintf(response_body, 
             sizeof(response_body),
-            "<html>"
-                "<body><h1>%s</h1></body>"
-            "</html>",
+            "{"
+                "'value': '%s'"
+            "}",
             response_content
             );
 
@@ -44,7 +44,7 @@ int handle_response(char *response, size_t response_size, char *response_content
     get_http_date(date, sizeof(date));
     snprintf(response_headers,
              sizeof(response_headers),
-             "Date: %s\r\nServer: webserver-c\r\nContent-length: %lu\r\nContent-type: text/html\r\nConnection: keep-alive",
+             "Date: %s\r\nServer: webserver-c\r\nContent-length: %lu\r\nContent-type: application/json\r\nConnection: keep-alive",
              date,
              strlen(response_body)
              );

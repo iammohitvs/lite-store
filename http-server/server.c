@@ -180,7 +180,7 @@ void *request_routine(void *thread_args){
     } else if(strcmp(response_value, "500") == 0){
         return_500_response(response, sizeof(response));
     } else {
-        snprintf(response_content, sizeof(response_content), "query executed successfully: %s", response_value);
+        snprintf(response_content, sizeof(response_content), "%s", response_value);
         if(handle_response(response, sizeof(response), response_content) == -1) {
             return_500_response(response, sizeof(response));
         }
