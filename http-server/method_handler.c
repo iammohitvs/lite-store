@@ -35,14 +35,14 @@ char *handle_GET_request(http_request *request){
         char* read_entry_value = read_entry(name);
 
         if(!read_entry_value){
-            printf("name doesnt exist in the hash table (read entry)\n");
+            fprintf(stderr, "name doesnt exist in the hash table (read entry)\n");
             return error_return_400;
         } else {
             printf("Read entry value: %s\n", read_entry_value);
             return read_entry_value;
         }
     } else {
-        printf("Unable to extract name\n");
+        fprintf(stderr, "Unable to extract name\n");
         return error_return_500;
     }
 
@@ -68,7 +68,7 @@ char* handle_POST_request(http_request *request){
 
     const char* name_param = strstr(query, "name=");
     if(!name_param){
-        printf("Unable to extract name\n");
+        fprintf(stderr, "Unable to extract name\n");
         return error_return_400;
     }
     name_param += 5;
@@ -78,7 +78,7 @@ char* handle_POST_request(http_request *request){
     if(end_name){
         len_name = end_name - name_param;
     } else {
-        printf("Unable to extract name\n");
+        fprintf(stderr, "Unable to extract name\n");
         return error_return_400;
     }
 
@@ -89,13 +89,13 @@ char* handle_POST_request(http_request *request){
 
         printf("Extracted the name: %s\n", name);
     } else {
-        printf("Unable to extract name\n");
+        fprintf(stderr, "Unable to extract name\n");
         return error_return_500;
     }
 
     const char* value_param = strstr(query, "value=");
     if(!value_param){
-        printf("Unable to extract value\n");
+        fprintf(stderr, "Unable to extract value\n");
         return error_return_500;
     }
     value_param += 6;
@@ -109,7 +109,7 @@ char* handle_POST_request(http_request *request){
 
         printf("Extracted the value: %s\n", value);
     } else {
-        printf("Unable to extract value\n");
+        fprintf(stderr, "Unable to extract value\n");
         return error_return_500;
     }
 
@@ -152,7 +152,7 @@ char* handle_DELETE_request(http_request *request){
 
         return entry_deleted_value;
     } else {
-        printf("Unable to extract name\n");
+        fprintf(stderr, "Unable to extract name\n");
 
         return error_return_500;
     }
@@ -203,7 +203,7 @@ char* manage_request(http_request *request){
             /* PATCH */
             break;
         default:
-            printf("Manage request (cannot identify method) - inner switch");
+            fprintf(stderr, "Manage request (cannot identify method) - inner switch");
             return error_return_400;
         }
         break;
@@ -216,7 +216,7 @@ char* manage_request(http_request *request){
         return handle_OPTIONS_request();
         break;
     default:
-        printf("Manage request (cannot identify method) - outer switch");
+        fprintf(stderr, "Manage request (cannot identify method) - outer switch");
         return error_return_400;
     }
 

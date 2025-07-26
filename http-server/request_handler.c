@@ -6,7 +6,7 @@
 
 int print_request(http_request *request){
     if(!request){
-        printf("No valid request received (print request)");
+        fprintf(stderr, "No valid request received (print request)");
     }
 
     printf("\nREQUEST:\n");
@@ -42,17 +42,17 @@ int create_and_build_request(char *raw_request, http_request *request){
 
     char *method = strtok(tok_main, space_splitter);
     if(method == 0){
-        perror("Create and build request (couldn't get method)");
+        perror("Couldn't get method (create and build request)");
         return -1;
     }
     char *path = strtok(NULL, space_splitter);
     if(path == 0){
-        perror("Create and build request (couldn't get path)");
+        perror("Couldn't get path (create and build request)");
         return -1;
     }
     char *version = strtok(NULL, space_splitter);
     if(version == 0){
-        perror("Create and build request (couldn't get version)");
+        perror("Couldn't get version (create and build request)");
         return -1;
     }
     
@@ -129,7 +129,7 @@ int create_and_build_request(char *raw_request, http_request *request){
 
 int handle_request(char *raw_request, http_request *request){
     if(!raw_request || !request){
-        perror("Request (no request or raw request)");
+        fprintf(stderr, "Request (no request or no raw request)");
         return -1;
     }
 

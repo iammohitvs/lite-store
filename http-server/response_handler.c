@@ -7,7 +7,7 @@
 
 int print_response(char *response){
     if(!response){
-        printf("Invalid response received (rpint response)");
+        fprintf(stderr, "Invalid response received (print response)");
         return -1;
     }
 
@@ -24,7 +24,7 @@ void get_http_date(char *date, size_t date_size){
 
 int handle_response(char *response, size_t response_size, char *response_content){
     if(!response || !response_size){
-        perror("Invalid response or response size or response code (handle response)");
+        fprintf(stderr, "Invalid response or response size or response code (handle response)");
         return -1;
     }
 

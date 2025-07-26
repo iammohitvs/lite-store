@@ -62,7 +62,7 @@ char* create_entry(char *name, char* value){
 
     HashTableEntry *new_entry = malloc(sizeof(HashTableEntry));;
     if (!new_entry){
-        fprintf(stderr, "Failed to malloc for new entry (create entry)");
+        perror("Failed to malloc for new entry (create entry)");
         pthread_mutex_unlock(&write_mutex);
         return error_return_400;
     }
