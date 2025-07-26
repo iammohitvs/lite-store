@@ -54,10 +54,6 @@ int main(int argc, char const *argv[])
     host_addr.sin_port = htons(PORT); // Giving it a port, so that it can work on both big endian and little endian devices
     host_addr.sin_addr.s_addr = htonl(INADDR_ANY); // 0.0.0.0 address - any address (special address)
 
-    // Building a CLIENT
-    struct sockaddr_in client_addr;
-    int client_addrlen = sizeof(client_addr);
-
     if(bind(socketFileDescriptor, (struct sockaddr *)&host_addr, addr_len) != 0){
         perror("Webserver (bind)");
         return 1;

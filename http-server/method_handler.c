@@ -126,7 +126,6 @@ char* handle_DELETE_request(http_request *request){
 
     char *error_return_400 = "400";
     char *error_return_500 = "500";
-    char *empty = "empty";
 
     char* path_copy = strdup(request->path);
 
@@ -180,7 +179,6 @@ char* handle_OPTIONS_request(){
 
 char* manage_request(http_request *request){
     char *error_return_400 = "400";
-    char *error_return_500 = "500";
 
     switch (request->method[0])
     {

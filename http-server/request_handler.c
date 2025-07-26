@@ -33,7 +33,6 @@ int create_and_build_request(char *raw_request, http_request *request){
 
     const char header_splitter[4] = "\n";
     const char space_splitter[4] = " ";
-    const char colon_splitter[4] = ": ";
 
     char *tok_main = strtok(request_copy_for_main, header_splitter);
     if(strlen(tok_main) > 0 && tok_main[strlen(tok_main) - 1] == '\r'){
@@ -56,7 +55,6 @@ int create_and_build_request(char *raw_request, http_request *request){
         return -1;
     }
     
-    header headers[100];
     request->header_count = 0;
     request->body_length = 0;
 
