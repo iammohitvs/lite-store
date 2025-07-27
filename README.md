@@ -44,9 +44,79 @@ The project, to remain usable at high workloads and remain fault-tolerant, is pe
 
 ---
 
-## In-depth Run Through
+## Setup guide and Working
 
-### Flow Diagram
+### Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+1. A C compiler, such as ```gcc```.
+1. The ```make``` utility to build the project from the Makefile.
+1. The ```pthreads``` library (standard on most Linux systems).
+
+### Compilation & Setup
+1. **Clone the Repository:**
+
+```sh
+git clone https://github.com/iammohitvs/lite-store
+cd lite-store
+```
+
+2. **Build the Project:**
+
+Simply run the ```make``` command in the root directory. This will compile all the source files and create an executable named ```main```.
+
+```sh
+make
+```
+
+3. **Run the Server:**
+
+Start the server by running the ```main``` executable. By default, it will listen for connections on port 8080.
+
+```sh
+./main
+```
+
+The server is now running and ready to accept requests.
+
+### Working
+
+#### Server Initialization
+On startup, the server performs two key actions:
+1.  It attempts to load existing data from `data.csv` into the in-memory hash table. If the file doesn't exist, it starts with a fresh, empty data store.
+2.  It initializes a pool of worker threads to handle concurrent client requests.
+
+#### Interacting with the Server
+You can interact with the server using any HTTP client like `curl` or Postman. All values are simple strings.
+
+**1. SET a value:**
+This command creates a new entry or updates an existing one.
+```sh
+# The name and value are part of the request url query paramaeteres
+curl -X POST http://localhost:8080?name=Regional%20Manager&value=Micheal%20Scott  
+```
+
+
+**1. GET a value:**
+This command retrieves the value associated with a name.
+```sh
+# The name is part of the request url query paramaeteres
+curl -X GET http://localhost:8080?name=Assistant%20to%20the%20Regional%20Manager  
+```
+
+
+**1. DELETE a value:**
+This command removes a name and its associated value from the store.
+```sh
+# The name is part of the request url query paramaeteres
+curl -X DELETE http://localhost:8080?name=Receptionist
+```
+
+---
+
+## Project Overview
+
+## In-depth Run Through
 
 ### HTTP Server with Multithreading
 
@@ -54,7 +124,7 @@ The project, to remain usable at high workloads and remain fault-tolerant, is pe
 
 The client begins by sending an http request to the server, which begins to parse it. As it parses the http request, it builds a `request` structure to store the various parts of the request:
 
-```
+```c
 typedef struct {
     char name[50];
     char value[50];
@@ -97,7 +167,7 @@ Hash tables are prone to collisions, which occurs when a hash function maps two 
 
 The hash function used here is called DJB2.
 
-```
+```c
 // DJB2 hash function
 unsigned long hash_function(const char* name){
     if(!name){
