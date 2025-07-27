@@ -38,7 +38,7 @@ This project is built with two main components:
 
 Lite-store is a simple in-memory data store that is made usable via an HTTP server. It is written completely in the C programming language, due to the language's characteristics of being extremely fast, providing efficient control over memory, being lightweight and portable, and most importantly - it is a great language for computer science students to learn system-level concepts.
 
-This project is built in two parts, like mentioned before. An HTTP server that listenes for requests, parses them and sends them along to the in-memory data store to execute the intended queries. The in-memory data store allows you to perform basic CRUD operations to a hash table using name value pairs. Creating a name-value pair via a `POST` request, retreiving an already created pair via a `GET` request, or deleting a stored value using a `DELETE` request. The guide for usage is available in the [Setup Guide and Working](#setup-guide-and-working) section of the documentation.
+This project is built in two parts, like mentioned before. An HTTP server that listens for requests, parses them and sends them along to the in-memory data store to execute the intended queries. The in-memory data store allows you to perform basic CRUD operations to a hash table using name value pairs. Creating a name-value pair via a `POST` request, retrieving an already created pair via a `GET` request, or deleting a stored value using a `DELETE` request. The guide for usage is available in the [Setup Guide and Working](#setup-guide-and-working) section of the documentation.
 
 The project, to remain usable at high workloads and remain fault-tolerant, is persistent to disk (non-volatile memory), and executes requests using parallel threading - pthreads.
 
@@ -73,32 +73,32 @@ typedef struct {
 } http_request;
 ```
 
-The request is then managed by sending it over to the the right handler to process the many types of requests it can be. A reponse is then formed and sent back to the client. The entire process is very well logged and all errors are gracefully handled with proper 400 and 500 responses returned.
+The request is then managed by sending it over to the right handler to process the many types of requests it can be. A response is then formed and sent back to the client. The entire process is very well logged and all errors are gracefully handled with proper 400 and 500 responses returned.
 
 #### pthreads
 
-To avail the benefits of multi-threading, and since this was built on a UNIX based OS, we use POSIX threads (pthreads). `pthreads` provides us with functionality to create, wait for, cancel, and terminate threads. The main advantage of multithreading, is parallel processing, and processing of tasks on other threads without taking up the main thread. Here, each requests is processed on a newly created thread, while the main thread is the one which constantly listens for requests to create new threads to processess it, and it doesn't end up blocking a second request while processing a first one.
+To avail the benefits of multi-threading, and since this was built on a UNIX based OS, we use POSIX threads (pthreads). `pthreads` provides us with functionality to create, wait for, cancel, and terminate threads. The main advantage of multithreading is parallel processing, and processing of tasks on other threads without taking up the main thread. Here, each request is processed on a newly created thread, while the main thread is the one which constantly listens for requests to create new threads to process it, and it doesn't end up blocking a second request while processing a first one.
 
 ![multithreading flowchart for web servers](/public/pthreads-flowchart.png)
 
 ### Data Store with mutual exclusion
 
-The in-memory data store is essentially a **hash table** on memory. We decide the hash table index for a particular nam-value pair by using a **hash function**.
+The in-memory data store is essentially a **hash table** on memory. We decide the hash table index for a particular name-value pair by using a **hash function**.
 
 #### Hash Table
 
 The hash table is defined every time we run the program, and is erased out of memory every time we quit the program. Each entry of the hash table is a node in a linked list. Our hash table has a maximum capacity of `1024` entries.
 
-Hash tables are prone to collisions, which occurs when a hash function maps two different keys (in this case the name) to the same index to store the value. Using a technique called **chaining**, we avoid collisions. Chaining is the process of linking each entry at the index to the next one and so on, allowing us to store infinite entrys with the same index.
+Hash tables are prone to collisions, which occurs when a hash function maps two different keys (in this case the name) to the same index to store the value. Using a technique called **chaining**, we avoid collisions. Chaining is the process of linking each entry at the index to the next one and so on, allowing us to store infinite entries with the same index.
 
 ![chaining diagram](/public/chaining.png)
 
 #### Hash Function
 
-The hash fcuntion used here is called DJB2.
+The hash function used here is called DJB2.
 
 ```
-// DJB2 hash funciton
+// DJB2 hash function
 unsigned long hash_function(const char* name){
     if(!name){
         perror("name not found (hash function)");
@@ -120,17 +120,17 @@ The DJB2 hash function, created by Daniel J. Bernstein, is a simple and effectiv
 
 ### Persistence
 
-In order to make the server **durable**, we wat to make sure that on unplanend shutdowns, data remains persisted and can be accessed again on server restart.
+In order to make the server **durable**, we want to make sure that on unplanned shutdowns, data remains persisted and can be accessed again on server restart.
 
-By default, this system stores and retreivs values from a `data.csv` file, and will create one in the root directory of the project if there isnt one already.
+By default, this system stores and retrieves values from a `data.csv` file, and will create one in the root directory of the project if there isn't one already.
 
 ---
 
 ## Mutual Exclusion (mutex)
 
-Since we have a sotre of data that is accessed constantly, it becomes important to make sure that no two executing processes or threads execute their critical section simultaneously while causing unpredictable results to the data.
+Since we have a store of data that is accessed constantly, it becomes important to make sure that no two executing processes or threads execute their critical section simultaneously while causing unpredictable results to the data.
 
-To prevent this, we use a synchrnization technique wit the help of a **mutex** - `pthread_mutex_t`.
+To prevent this, we use a synchronisation technique with the help of a **mutex** - `pthread_mutex_t`.
 
 Three mutexes are used in this program:
 
@@ -138,7 +138,7 @@ Three mutexes are used in this program:
 -   write_mutex
 -   read_count_mutex
 
-These mutexes are also utilized ina very specefic manner, so as to solve the readers-writes problem. More information about this can be found in the [resources](#resources) section of the document.
+These mutexes are also utilized in a very specific manner, so as to solve the readers-writes problem. More information about this can be found in the [resources](#resources) section of the document.
 
 ---
 
@@ -165,7 +165,7 @@ While this server captures the spirit of Redis, it's important to understand its
 
 ## Future Improvements
 
-This project is always looking for improvements, and anyone reading this can clone it onto their system and improve upon it. If your wondering where you can help, here are some ideas:
+This project is always looking for improvements, and anyone reading this can clone it onto their system and improve upon it. If you're wondering where you can help, here are some ideas:
 
 -   Support for More Data Structures like `Lists`, `Hashes` and `Sets`
 -   Advanced Persistence (AOF) by logging data onto disk after every operation instead of a snapshot on shut-down
