@@ -114,8 +114,6 @@ curl -X DELETE http://localhost:8080?name=Receptionist
 
 ---
 
-## Project Overview
-
 ## In-depth Run Through
 
 ### HTTP Server with Multithreading
