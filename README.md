@@ -97,7 +97,7 @@ curl -X POST http://localhost:8080?name=Regional%20Manager&value=Micheal%20Scott
 ```
 
 
-**1. GET a value:**
+**2. GET a value:**
 This command retrieves the value associated with a name.
 ```sh
 # The name is part of the request url query paramaeteres
@@ -105,7 +105,7 @@ curl -X GET http://localhost:8080?name=Assistant%20to%20the%20Regional%20Manager
 ```
 
 
-**1. DELETE a value:**
+**3. DELETE a value:**
 This command removes a name and its associated value from the store.
 ```sh
 # The name is part of the request url query paramaeteres
